@@ -11,33 +11,65 @@
 .globl main
 
 main:
-	load_args()		# Only do this once
-	# counts number of uppercase letters: ASCII values in the range 65-90
-	li $t0, 0	# count of uppercase letters
-	lw $t1, arg1	# address of string
+	load_args()				# Only do this once0
+	li $t0, 0				# sum
+	lw $t1, arg1				# address of string
+	li $t3, 0				# initialize negative to false
+	li $t4, 48				# for converting ascii to decimal
+	li $t6, 10				# for multiplication by 10
+	
+	lb $t2, 0($t1)				# string[i]
+	beq $t2, 45, negative			# string[i] is "-"
+	j loop1
+	
+negative:
+	li $t3, 1				#set negative to true
+	j next_char
 	
 loop1:
-	lb $t2, 0($t1)		# string[i]
-	beqz $t2, done1		# hit NULL character at end of string
-	blt $t2, 65, not_uppercase_letter # minimum ASCII value
-	bgt $t2, 90, not_uppercase_letter # maximum ASCII value
-	addi $t0, $t0, 1	# add 1 to count of uppercase letters
+	lb $t2, 0($t1)				# string[i]
+	beqz $t2, done1				# hit NULL character at end of string
+	blt $t2, 48, done1			# minimum ASCII value
+	bgt $t2, 57, done1		 	# maximum ASCII value
+	sub $t5, $t2, $t4			# set t5 to the decimal value of string[i]
+	mul $t0, $t0, $t6			# sum = sum * 10
+	add $t0, $t0, $t5			# sum = sum + deciamal value of string[i]
 
-not_uppercase_letter:		
-	addi $t1, $t1, 1	# advance to next character of string
-	j loop1
+next_char:		
+	addi $t1, $t1, 1			# advance to next character of string
+	j loop1	
 
 done1:
-	la $a0, count_msg 	
-	li $v0, 4		# syscall 4 is print_string
+	beq $t3, 0, done2
+	sub $t0, $zero, $t0
+	
+done2:
+	la $a0, msg1 	
+	li $v0, 4				# syscall 4 is print_string
 	syscall
 	
-	move $a0, $t0		# get count
-	li $v0, 1		# syscall 1 is print_integer
+	lw $a0, arg1				# get input
+	li $v0, 4				# syscall 4 is print_string
 	syscall
 	
+	la $a0, msg2 	
+	li $v0, 4				# syscall 4 is print_string
+	syscall	
+	
+	move $a0, $t0				# get sum
+	li $v0, 1				# syscall 1 is print_integer
+	syscall
+
 	la $a0, endl 	
-	li $v0, 4		# syscall 4 is print_string
+	li $v0, 4				# syscall 4 is print_string
+	syscall		
+	
+	la $a0, msg3 	
+	li $v0, 4				# syscall 4 is print_string
+	syscall
+	
+	move $a0, $t0				# get sum
+	li $v0, 34				# syscall 34 is print integer in hex
 	syscall
 
 exit:
@@ -57,7 +89,4 @@ dbl: .asciiz "Double Dabble: "
 msg1: .asciiz "You entered "
 msg2: .asciiz " which parsed to "
 msg3: .asciiz "In hex it looks like "
-input: .asciiz "Computer Science @ Stony Brook University 2016"
-count_msg: .asciiz "Number of uppercase letters: "
-space: .asciiz " "
 endl: .ascii "\n"
