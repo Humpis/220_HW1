@@ -12,6 +12,28 @@
 
 main:
 	load_args()				# Only do this once0
+	
+	lw $t1, arg2				# address of second arg
+	lb $t2, 0($t1)				# letter of arg2
+	beq $t2, '1', arg2_1			# string[i] is "1"
+	beq $t2, 's', arg2_s			# string[i] is "s"
+	beq $t2, 'g', arg2_g			# string[i] is "g"
+	
+	la $a0, error 				# print error
+	li $v0, 4				# syscall 4 is print_string
+	syscall
+	j exit
+	
+arg2_1:
+	j main2
+	
+arg2_s:
+	j main2
+	
+arg2_g:
+	j main2
+
+main2:
 	li $t0, 0				# sum
 	lw $t1, arg1				# address of string
 	li $t3, 0				# initialize negative to false
