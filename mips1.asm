@@ -110,7 +110,7 @@ done2:
 	syscall	
 	beq $t3, 0, not_negative1s		# not negative
 	li $t7, 1				# for subtracting by 1
-	sub $t0, $t0, $t7			# subtract 1 if it is ones compliment
+	sub $t0, $t0, $t7			# subtract 1 if it is ones compliment and negative
 	
 not_negative1s:
 	move $a0, $t0				# get sum
@@ -123,6 +123,20 @@ sign_magnitude:
 	la $a0, sm				# print sign mag
 	li $v0, 4				# syscall 4 is print_string
 	syscall	
+	
+	beq $t3, 0, not_negative_sm		# not negative
+	li $t7, 1				# for subtracting by 1
+	#sub $t0, $t0, $t7			# subtract 1 if it is negative
+	sub $t0, $zero, $t0			# flip the bits
+	li $t7, 1				# for 8 to be the first bit
+	li $t8, 31				# I have no idea why it is 28
+	sllv $t7, $t7, $t8			# if neg, put sign ???
+	add $t0, $t0, $t7			# this works, but how it does is beyond me
+	
+not_negative_sm:
+	move $a0, $t0				# get sum
+	li $v0, 34				# syscall 34 is print integer in hex
+	syscall
 	j exit
 	
 gray_code:
