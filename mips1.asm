@@ -13,24 +13,29 @@
 main:
 	load_args()				# Only do this once0
 	
+	li $s1, 0				# init the stored second arg to 0
 	lw $t1, arg2				# address of second arg
 	lb $t2, 0($t1)				# letter of arg2
+	
 	beq $t2, '1', arg2_1			# string[i] is "1"
 	beq $t2, 's', arg2_s			# string[i] is "s"
 	beq $t2, 'g', arg2_g			# string[i] is "g"
-	
-	la $a0, error 				# print error
+
+	la $a0, error 				# print error if its not 1,s,or g
 	li $v0, 4				# syscall 4 is print_string
 	syscall
 	j exit
 	
 arg2_1:
+	li $s1, 1				# change stored second arg to 1
 	j main2
 	
 arg2_s:
+	li $s1, 2				# change stored second arg to 2
 	j main2
 	
 arg2_g:
+	li $s1, 3				# change stored second arg to 3
 	j main2
 
 main2:
@@ -62,8 +67,8 @@ next_char:
 	j loop1	
 
 done1:
-	beq $t3, 0, done2
-	sub $t0, $zero, $t0
+	beq $t3, 0, done2			# not negative
+	sub $t0, $zero, $t0			# negative
 	
 done2:
 	la $a0, msg1 	
@@ -93,7 +98,40 @@ done2:
 	move $a0, $t0				# get sum
 	li $v0, 34				# syscall 34 is print integer in hex
 	syscall
-
+	
+	
+	la $a0, endl 				# print new line
+	li $v0, 4				# syscall 4 is print_string
+	syscall	
+# for 1's compliment	
+	bge $s1, 2, sign_magnitude		# if its not 1s compliment
+	la $a0, one				# print ones compliment
+	li $v0, 4				# syscall 4 is print_string
+	syscall	
+	beq $t3, 0, not_negative1s		# not negative
+	li $t7, 1				# for subtracting by 1
+	sub $t0, $t0, $t7			# subtract 1 if it is ones compliment
+	
+not_negative1s:
+	move $a0, $t0				# get sum
+	li $v0, 34				# syscall 34 is print integer in hex
+	syscall
+	j exit
+	
+sign_magnitude:
+	bge $s1, 3, gray_code			# if its not sign magnitude
+	la $a0, sm				# print sign mag
+	li $v0, 4				# syscall 4 is print_string
+	syscall	
+	j exit
+	
+gray_code:
+	bge $s1, 4, exit			# if its not gray code
+	la $a0, gray				# print gray
+	li $v0, 4				# syscall 4 is print_string
+	syscall	
+	j exit
+	
 exit:
 	# terminate program
 	li $v0, 10
