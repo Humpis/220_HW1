@@ -157,6 +157,7 @@ sign_magnitude:
 	syscall	
 	
 	beq $t3, 0, not_negative_sm		# not negative
+	beq $t0, 0, not_negative_sm		# not negative
 	li $t7, 1				# for subtracting by 1
 	#sub $t0, $t0, $t7			# subtract 1 if it is negative
 	sub $t0, $zero, $t0			# flip the bits
@@ -271,5 +272,6 @@ dbl: .asciiz "Double Dabble: "
 msg1: .asciiz "You entered "
 msg2: .asciiz " which parsed to "
 msg3: .asciiz "In hex it looks like "
-endl: .ascii "\n"
 print_neg: .asciiz "-"
+endl: .asciiz "\n"
+
