@@ -22,6 +22,7 @@ main:
 	beq $t2, '1', arg2_1			# string[i] is "1"
 	beq $t2, 's', arg2_s			# string[i] is "s"
 	beq $t2, 'g', arg2_g			# string[i] is "g"
+	beq $t2, 'd', arg2_d			# string[i] is "d"
 
 no_second_arg:
 	la $a0, error 				# print error if its not 1,s,or g
@@ -51,6 +52,16 @@ arg2_s:
 	
 arg2_g:
 	li $s1, 3				# change stored second arg to 3
+	addi $t1, $t1, 1			# advance to next character of string
+	lb $t2, 0($t1)				# letter of arg2
+	beqz $t2, main2				# hit NULL character at end of string
+	la $a0, error 				# print error if its not 1,s,or g
+	li $v0, 4				# syscall 4 is print_string
+	syscall
+	j exit
+	
+arg2_d:
+	li $s1, 4				# change stored second arg to 4
 	addi $t1, $t1, 1			# advance to next character of string
 	lb $t2, 0($t1)				# letter of arg2
 	beqz $t2, main2				# hit NULL character at end of string
@@ -161,7 +172,7 @@ not_negative_sm:
 	j exit
 	
 gray_code:
-	bge $s1, 4, exit			# if its not gray code
+	bge $s1, 4, double_dabble		# if its not gray code
 	la $a0, gray				# print gray
 	li $v0, 4				# syscall 4 is print_string
 	syscall
@@ -170,6 +181,32 @@ gray_code:
 	move $a0, $t0				# get sum
 	li $v0, 34				# syscall 34 is print integer in hex
 	syscall
+	j exit
+	
+double_dabble:
+	bge $s1, 5, exit			# if its not double dabble
+	la $a0, dbl				# print gray
+	li $v0, 4				# syscall 4 is print_string
+	syscall
+						# t0 is v
+						# t3 is negative
+	li $t1, 0 				# init r
+	li $t2, 0				# init k
+	
+loop_double:
+	bge $t2, 32, done_dabble		# if k is greater than or equal to 32, end
+	li $t4, 0				# msb = false
+	bge $t0, 0, dabble_positive		# if v < 0 do below
+	li $t4, 1				# msb = true
+	
+dabble_positive:
+	sll $t0, $t0, 1				# v = v << 1
+	sll $t1, $t1, 1				# r = r << 1
+		
+	addi $t2, $t2, 1			# k++
+	j loop_double
+	
+done_dabble:
 	j exit
 	
 exit:
