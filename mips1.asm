@@ -13,7 +13,7 @@
 main:
 	load_args()				# Only do this once0
 	
-	li $s1, 0				# init the stored second arg to 0
+	li $, 0				# init the stored second arg to 0
 	lw $t1, arg2				# address of second arg
 	beqz $t1, no_second_arg			# hit NULL character at end of string
 	lb $t2, 0($t1)				# letter of arg2	
@@ -202,11 +202,52 @@ loop_double:
 dabble_positive:
 	sll $t0, $t0, 1				# v = v << 1
 	sll $t1, $t1, 1				# r = r << 1
-		
+	beq $t4, 0, msb_check			# if msb is set, do below
+	addi $t1, $t1, 1			# add 1 to r
+	
+msb_check:
+	blt $t2, 31, check_nibble1		# if k is < 31
+	addi $t2, $t2, 1			# k++
+	j loop_double	
+	
+check_nibble1:
+	bne $t1, 0, check_nibble2		# if r != 0
 	addi $t2, $t2, 1			# k++
 	j loop_double
 	
+check_nibble2:
+	li $t5, 4026531840			# t5 = mask = 0xf0000000
+	li $t6,	1073741824			# t6 = cmp = 0x40000000
+	li $t7, 805306368			# t7 = add = 0x30000000
+	li $s0, 0				# i = 0
+	
+dabble_loop2:
+	blt $s0, 8, dabble_loop2_cont  		# if i < 8 continue 
+	addi $t2, $t2, 1			# k++
+	j loop_double				# end loop2
+	
+dabble_loop2_cont:
+	and $s2, $t5, $t1			# mv = mask & r
+	ble $s2, $t6, mv_less_cmp
+	add $t1, $t1, $t7			# r = r + add
+	
+mv_less_cmp:
+	srl $t5, $t5, 4
+	srl $t6, $t6, 4
+	srl $t7, $t7, 4
+	addi $s0, $s0, 1			# i++
+	j dabble_loop2
+	
 done_dabble:
+	beqz $t3, not_neg
+	la $a0, print_neg			# print "-"
+	li $v0, 4				# syscall 4 is print_string
+	syscall	
+	
+not_neg:
+	move $a0, $t1				# get sum
+	li $v0, 34				# syscall 34 is print integer in hex
+	syscall
 	j exit
 	
 exit:
@@ -227,3 +268,4 @@ msg1: .asciiz "You entered "
 msg2: .asciiz " which parsed to "
 msg3: .asciiz "In hex it looks like "
 endl: .ascii "\n"
+print_neg: .asciiz "-"
