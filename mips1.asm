@@ -192,6 +192,10 @@ double_dabble:
 						# t3 is negative
 	li $t1, 0 				# init r
 	li $t2, 0				# init k
+	beq $t3, 0, loop_double			# not negative
+	#li $t7, 1				# for subtracting by 1
+	#sub $t0, $t0, $t7			# subtract 1 if it is negative
+	sub $t0, $zero, $t0			# flip the bits
 	
 loop_double:
 	bge $t2, 32, done_dabble		# if k is greater than or equal to 32, end
