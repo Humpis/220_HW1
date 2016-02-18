@@ -15,12 +15,15 @@ main:
 	
 	li $s1, 0				# init the stored second arg to 0
 	lw $t1, arg2				# address of second arg
-	lb $t2, 0($t1)				# letter of arg2
+	beqz $t1, no_second_arg			# hit NULL character at end of string
+	lb $t2, 0($t1)				# letter of arg2	
+	#beqz $t2, no_second_arg		# hit NULL character at end of string
 	
 	beq $t2, '1', arg2_1			# string[i] is "1"
 	beq $t2, 's', arg2_s			# string[i] is "s"
 	beq $t2, 'g', arg2_g			# string[i] is "g"
 
+no_second_arg:
 	la $a0, error 				# print error if its not 1,s,or g
 	li $v0, 4				# syscall 4 is print_string
 	syscall
@@ -28,15 +31,33 @@ main:
 	
 arg2_1:
 	li $s1, 1				# change stored second arg to 1
-	j main2
+	addi $t1, $t1, 1			# advance to next character of string
+	lb $t2, 0($t1)				# letter of arg2
+	beqz $t2, main2				# hit NULL character at end of string
+	la $a0, error 				# print error if its not 1,s,or g
+	li $v0, 4				# syscall 4 is print_string
+	syscall
+	j exit
 	
 arg2_s:
 	li $s1, 2				# change stored second arg to 2
-	j main2
+	addi $t1, $t1, 1			# advance to next character of string
+	lb $t2, 0($t1)				# letter of arg2
+	beqz $t2, main2				# hit NULL character at end of string
+	la $a0, error 				# print error if its not 1,s,or g
+	li $v0, 4				# syscall 4 is print_string
+	syscall
+	j exit
 	
 arg2_g:
 	li $s1, 3				# change stored second arg to 3
-	j main2
+	addi $t1, $t1, 1			# advance to next character of string
+	lb $t2, 0($t1)				# letter of arg2
+	beqz $t2, main2				# hit NULL character at end of string
+	la $a0, error 				# print error if its not 1,s,or g
+	li $v0, 4				# syscall 4 is print_string
+	syscall
+	j exit
 
 main2:
 	li $t0, 0				# sum
@@ -143,7 +164,12 @@ gray_code:
 	bge $s1, 4, exit			# if its not gray code
 	la $a0, gray				# print gray
 	li $v0, 4				# syscall 4 is print_string
-	syscall	
+	syscall
+	srl $s3, $t0, 1				#store shifted num in s3	
+	xor $t0, $t0, $s3			#xor shifted and num
+	move $a0, $t0				# get sum
+	li $v0, 34				# syscall 34 is print integer in hex
+	syscall
 	j exit
 	
 exit:
