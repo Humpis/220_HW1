@@ -13,7 +13,7 @@
 main:
 	load_args()				# Only do this once0
 	
-	li $, 0				# init the stored second arg to 0
+	li $s1, 0				# init the stored second arg to 0
 	lw $t1, arg2				# address of second arg
 	beqz $t1, no_second_arg			# hit NULL character at end of string
 	lb $t2, 0($t1)				# letter of arg2	
